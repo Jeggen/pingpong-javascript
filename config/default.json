@@ -1,0 +1,12 @@
+{
+  "host": "localhost",
+  "port": 3030,
+  "mongodb": "mongodb://localhost:27017/pongGame",
+  "public": "../public/",
+  "auth": {
+    "token": {
+      "secret": "kkF6xyDHQX8pt2Im6Cy/uaO8giknl8iYdjSTn+oc/QCKHdXN02U/yQjgTQ8Em2l2p6FMTvm5MgkS/e5YbgoSRQ=="
+    },
+    "local": {}
+  }
+}

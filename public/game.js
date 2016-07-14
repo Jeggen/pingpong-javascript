@@ -11,7 +11,7 @@ canvas.height = height;
 var context = canvas.getContext('2d');
 
 var player1 = new Player1();
-var computer = new Computer();
+var player2 = new Player2();
 var ball = new Ball(300, 200); //starting point of ball
 
 window.onload = function() {
@@ -27,10 +27,10 @@ var step = function() {
 
 // general setup
 var render = function () {
-  context.fillStyle = "#000";
+  context.fillStyle = "#000"; // background color of canvas
   context.fillRect(0, 0, width, height);
   player1.render();
-  computer.render();
+  player2.render();
   ball.render();
 };
 
@@ -47,7 +47,7 @@ function Bat(x, y, width, height) {
 }
 
 Bat.prototype.render = function() {
-  context.fillStyle = "#0000FF"; //color of bats
+  context.fillStyle = "#B22222"; //color of bats
   context.fillRect(this.x, this.y, this.width, this.height);
 };
 
@@ -57,7 +57,7 @@ function Player1() {
 }
 
 // starting position of left(computer) bat
-function Computer() {
+function Player2() {
   this.bat = new Bat (10, 175, 13, 90);
 }
 
@@ -65,7 +65,7 @@ Player1.prototype.render = function() {
   this.bat.render();
 };
 
-Computer.prototype.render = function() {
+Player2.prototype.render = function() {
   this.bat.render();
 };
 
@@ -83,7 +83,7 @@ function Ball(x, y) {
 Ball.prototype.render = function() {
   context.beginPath();
   context.arc(this.x, this.y, this.radius, 2 * Math.PI, false);
-  context.fillStyle = "#FFF";
+  context.fillStyle = "#FFA500"; // color of ball
   context.fill();
 };
 
@@ -171,22 +171,43 @@ Bat.prototype.move = function(x, y) {
 
 var update = function() {
   player1.update();
-  computer.update(ball);
-  ball.update(player1.bat, computer.bat);
+  player2.update(ball);
+  ball.update(player1.bat, player2.bat);
 };
 
-Computer.prototype.update = function(ball) {
-  var y_pos = ball.y;
-  var diff = -((this.bat.y + (this.bat.height / 2)) - y_pos);
-  if(diff < 0 && diff < -4) { // max speed
-    diff = -5;
-  } else if(diff > 0 && diff > 4) { // max speed
-    diff = 5;
-  }
-  this.bat.move(diff, 0);
-  if(this.bat.y < 0) {
-    this.bat.y = 0;
-  } else if (this.bat.y + this.bat.height > 200) {
-    this.bat.y = 200 - this.bat.height;
+var keysDown = {};
+
+window.addEventListener("keydown", function(event) {
+  keysDown[event.keyCode] = true;
+});
+
+window.addEventListener("keyup", function(event) {
+  delete keysDown[event.keyCode];
+});
+
+Player2.prototype.update = function() {
+  for(var key in keysDown) {
+    var value = Number(key);
+    if(value == 65) { // left arrow
+      this.bat.move(0, -4);
+    } else if (value == 90) { // right arrow
+      this.bat.move(0, 4);
+    } else {
+      this.bat.move(0, 0);
+    }
   }
 };
+
+Bat.prototype.move = function(x, y) {
+  this.x += x;
+  this.y += y;
+  this.x_speed = x;
+  this.y_speed = y;
+  if(this.y < 0) { // all the way to the bottom
+    this.y = 0;
+    this.y_speed = 0;
+  } else if (this.y + this.height > 400) { // all the way to the top
+    this.y = 400 - this.height;
+    this.y_speed = 0;
+  }
+}

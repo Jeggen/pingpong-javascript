@@ -4,12 +4,15 @@ var animate = window.requestAnimationFrame ||
   function(callback) { window.setTimeout(callback, 1000/60) };
 
 var canvas = document.createElement('canvas');
-var width = 800;
-var height = 600;
+var width = 600;
+var height = 400;
 canvas.width = width;
 canvas.height = height;
 var context = canvas.getContext('2d');
 
+var player1 = new Player1();
+var computer = new Computer();
+var ball = new Ball(300, 200); //starting point of ball
 
 window.onload = function() {
   document.body.appendChild(canvas);
@@ -22,13 +25,17 @@ var step = function() {
   animate(step);
 };
 
-var update = function() {
+// general setup
+var render = function () {
+  context.fillStyle = "#000";
+  context.fillRect(0, 0, width, height);
+  player1.render();
+  computer.render();
+  ball.render();
 };
 
-var render = function () {
-  context.fillStyle = "blue";
-  context.fillRect(0, 0, width, height);
-};
+
+// -------------functions and render ---------------
 
 function Bat(x, y, width, height) {
   this.x = x;
@@ -40,19 +47,21 @@ function Bat(x, y, width, height) {
 }
 
 Bat.prototype.render = function() {
-  context.fillStyle = "#0000FF";
+  context.fillStyle = "#0000FF"; //color of bats
   context.fillRect(this.x, this.y, this.width, this.height);
 };
 
-function Player() {
-   this.bat = new Bat(365, 580, 120, 13);
+// starting position of right(player1) bat
+function Player1() {
+   this.bat = new Bat(580, 175, 13, 90);
 }
 
+// starting position of left(computer) bat
 function Computer() {
-  this.bat = new Bat (365, 10, 90, 13);
+  this.bat = new Bat (10, 175, 13, 90);
 }
 
-Player.prototype.render = function() {
+Player1.prototype.render = function() {
   this.bat.render();
 };
 
@@ -60,14 +69,17 @@ Computer.prototype.render = function() {
   this.bat.render();
 };
 
+// ----------- Ball -----------------
+
 function Ball(x, y) {
   this.x = x;
   this.y = y;
-  this.x_speed = 0;
-  this.y_speed = 4;
-  this.radius = 10;
+  this.y_speed = 0;
+  this.x_speed = 3;
+  this.radius = 10; //size of ball
 }
 
+// Bal styling
 Ball.prototype.render = function() {
   context.beginPath();
   context.arc(this.x, this.y, this.radius, 2 * Math.PI, false);
@@ -75,71 +87,48 @@ Ball.prototype.render = function() {
   context.fill();
 };
 
-var player = new Player();
-var computer = new Computer();
-var ball = new Ball(400, 300);
-
-var render = function() {
-  context.fillStyle = "#000";
-  context.fillRect(0, 0, width, height);
-  player.render();
-  computer.render();
-  ball.render();
-}
-
-var update = function() {
-  ball.update();
-};
-
-Ball.prototype.update = function() {
-  this.x += this.x_speed;
-  this.y += this.y_speed;
-};
-
-var update = function() {
-  ball.update(player.bat, computer.bat);
-};
-
 Ball.prototype.update = function(bat1, bat2) {
   this.x += this.x_speed;
   this.y += this.y_speed;
-  var top_x = this.x - 5;
   var top_y = this.y - 5;
-  var bottom_x = this.x + 5;
+  var top_x = this.x - 5;
   var bottom_y = this.y + 5;
+  var bottom_x = this.x + 5;
 
-  if(this.x - 5 < 0) { // hitting the left wall
-    this.x = 5;
-    this.x_speed = -this.x_speed;
-  } else if(this.x + 5 > 800) { // hitting the right wall
-    this.x = 795;
-    this.x_speed = -this.x_speed;
+  if(this.y - 5 < 0) { // ball hitting the bottom
+    this.y = 5;
+    this.y_speed = -this.y_speed;
+  } else if(this.y + 5 > 400) { // ball hitting the top
+    this.y = 395;
+    this.y_speed = -this.y_speed;
   }
 
-  if(this.y < 0 || this.y > 600) { // a point was scored
-    this.x_speed = 0;
-    this.y_speed = 3;
-    this.x = 400;
-    this.y = 300;
+  if(this.x < 0 || this.x > 600) { // ball goes outside canvas
+    this.y_speed = 0;
+    this.x_speed = 3; //movement of ball after restart
+    this.y = 200; //position of ball after restart
+    this.x = 300;
   }
 
-  if(top_y > 300) {
-    if(top_y < (bat1.y + bat1.height) && bottom_y > bat1.y && top_x < (bat1.x + bat1.width) && bottom_x > bat1.x) {
-      // hit the player's paddle
-      this.y_speed = -3;
-      this.x_speed += (bat1.x_speed / 2);
-      this.y += this.y_speed;
+  if(top_x > 300) {
+    if(top_x < (bat1.x + bat1.width) && top_x > bat1.x && bottom_y < (bat1.y + bat1.height) && top_y > bat1.y) {
+      // hit the player's paddle and gets extra speed
+      this.x_speed = -3;
+      this.y_speed += (bat1.y_speed / 2);
+      this.x += this.x_speed;
     }
   } else {
-    if(top_y < (bat2.y + bat2.height) && bottom_y > bat2.y && top_x < (bat2.x + bat2.width) && bottom_x > bat2.x) {
-      // hit the computer's paddle
-      this.y_speed = 3;
-      this.x_speed += (bat2.x_speed / 2);
-      this.y += this.y_speed;
+    if(top_x < (bat2.x + bat2.width) && top_x > bat2.x && bottom_y < (bat2.y + bat2.height) && top_y > bat2.y) {
+      // hit the computer's paddle and gets extra speed
+      this.x_speed = 3;
+      this.y_speed += (bat2.y_speed / 2);
+      this.x += this.x_speed;
     }
   }
 };
 
+// -------------- Movements ---------------------------
+// ---------------Player1 Movements -------------------
 var keysDown = {};
 
 window.addEventListener("keydown", function(event) {
@@ -150,18 +139,13 @@ window.addEventListener("keyup", function(event) {
   delete keysDown[event.keyCode];
 });
 
-var update = function() {
-  player.update();
-  ball.update(player.bat, computer.bat);
-};
-
-Player.prototype.update = function() {
+Player1.prototype.update = function() {
   for(var key in keysDown) {
     var value = Number(key);
-    if(value == 37) { // left arrow
-      this.bat.move(-4, 0);
-    } else if (value == 39) { // right arrow
-      this.bat.move(4, 0);
+    if(value == 38) { // left arrow
+      this.bat.move(0, -4);
+    } else if (value == 40) { // right arrow
+      this.bat.move(0, 4);
     } else {
       this.bat.move(0, 0);
     }
@@ -173,33 +157,36 @@ Bat.prototype.move = function(x, y) {
   this.y += y;
   this.x_speed = x;
   this.y_speed = y;
-  if(this.x < 0) { // all the way to the left
-    this.x = 0;
-    this.x_speed = 0;
-  } else if (this.x + this.width > 800) { // all the way to the right
-    this.x = 800 - this.width;
-    this.x_speed = 0;
+  if(this.y < 0) { // all the way to the bottom
+    this.y = 0;
+    this.y_speed = 0;
+  } else if (this.y + this.height > 400) { // all the way to the top
+    this.y = 400 - this.height;
+    this.y_speed = 0;
   }
 }
 
+// ---------------Computer movements ---------------
+
+
 var update = function() {
-  player.update();
+  player1.update();
   computer.update(ball);
-  ball.update(player.bat, computer.bat);
+  ball.update(player1.bat, computer.bat);
 };
 
 Computer.prototype.update = function(ball) {
-  var x_pos = ball.x;
-  var diff = -((this.bat.x + (this.bat.width / 2)) - x_pos);
-  if(diff < 0 && diff < -4) { // max speed left
+  var y_pos = ball.y;
+  var diff = -((this.bat.y + (this.bat.height / 2)) - y_pos);
+  if(diff < 0 && diff < -4) { // max speed
     diff = -5;
-  } else if(diff > 0 && diff > 4) { // max speed right
+  } else if(diff > 0 && diff > 4) { // max speed
     diff = 5;
   }
   this.bat.move(diff, 0);
-  if(this.bat.x < 0) {
-    this.bat.x = 0;
-  } else if (this.bat.x + this.bat.width > 800) {
-    this.bat.x = 800 - this.bat.width;
+  if(this.bat.y < 0) {
+    this.bat.y = 0;
+  } else if (this.bat.y + this.bat.height > 200) {
+    this.bat.y = 200 - this.bat.height;
   }
 };

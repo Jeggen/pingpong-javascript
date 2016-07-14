@@ -31,7 +31,7 @@
     "feathers-errors": "^2.3.0",
     "feathers-hooks": "^1.5.4",
     "feathers-mongoose": "^3.5.0",
-    "feathers-rest": "^1.4.2",
+    "feathers-rest": "^1.4.3",
     "feathers-socketio": "^1.4.1",
     "mongoose": "^4.5.4",
     "passport": "^0.3.2",

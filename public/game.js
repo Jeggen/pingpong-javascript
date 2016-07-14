@@ -168,22 +168,11 @@ Bat.prototype.move = function(x, y) {
 
 // ---------------Computer movements ---------------
 
-
 var update = function() {
   player1.update();
   player2.update(ball);
   ball.update(player1.bat, player2.bat);
 };
-
-var keysDown = {};
-
-window.addEventListener("keydown", function(event) {
-  keysDown[event.keyCode] = true;
-});
-
-window.addEventListener("keyup", function(event) {
-  delete keysDown[event.keyCode];
-});
 
 Player2.prototype.update = function() {
   for(var key in keysDown) {

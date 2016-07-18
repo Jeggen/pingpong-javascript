@@ -177,9 +177,9 @@ var update = function() {
 Player2.prototype.update = function() {
   for(var key in keysDown) {
     var value = Number(key);
-    if(value == 65) { // left arrow
+    if(value == 65) { // a button
       this.bat.move(0, -4);
-    } else if (value == 90) { // right arrow
+    } else if (value == 90) { // z button
       this.bat.move(0, 4);
     } else {
       this.bat.move(0, 0);
